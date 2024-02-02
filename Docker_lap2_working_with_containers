@@ -1,0 +1,94 @@
+Before Starting
+Before the lab, you may want to make sure all your containers are stopped and removed. these commands will STOP and REMOVE all docker containers on the system.
+
+docker stop $(docker ps -aq) 2> /dev/null
+docker rm $(docker ps -aq) 2> /dev/null
+Start a container and test connectivity
+docker run -d httpd
+docker ps
+curl http://localhost
+Try to bring up a second container
+Now try the below commands:
+
+docker run -d -p 80:80 httpd
+curl http://localhost
+The connection should now work.. now try starting another container using the same command
+
+docker run -d -p 80:80 httpd
+Question
+Why does the second container fail to start?
+
+Answer
+Because port 80 on the host is already in use. The hostport must be unique!
+
+Bring up two containers
+Let's now bring up two containers on the host port 8081 and 8082
+
+docker run -d -p 8081:80 httpd
+docker run -d -p 8082:80 httpd
+Now do a curl to test http connectivity. it should work.
+
+curl http://localhost:8081
+curl http://localhost:8082
+Looking inside the container
+Grab the container ID of the container mapped to host port 8081
+
+docker ps
+now check the logs of that container using the container id.
+
+docker logs <container id>
+Do you see what's happening in the container? You should see the GET request from the curl command we performed earlier. "GET / HTTP/1.1" 200
+
+Following the logs
+You can also FOLLOW the logs using the -f parameter. you may want to open another terminal for this.
+
+docker logs -f <container id>
+curl http://localhost:8081
+curl http://localhost:8081
+curl http://localhost:8081
+You should see three GET requests come in.
+
+note: Ctrl+C should cancel the output
+
+Stopping / Removing containers
+Now try stopping your container that is listening on port 8081
+
+docker ps
+docker stop <container id>
+curl http://localhost:8081
+The connection will fail because the container is stopped. Do a docker ps and notice the container is not listed anymore
+
+docker ps
+This is because by default, docker ps only shows running containers. To find stopped containers, you must add the -a parameter for ALL
+
+docker ps -a
+Let's start the container back up again.
+
+docker start <container-id>
+We also have the option to restart containers. to restart the container run
+
+docker restart <container-id>
+Now try to remove the the container.
+
+docker rm <container id>
+It fails because the container is in a running state!
+
+stop the container again, and then remove it.
+
+docker stop <container-id>
+docker rm <container-id>
+docker ps -a
+you should see that your container is complete gone now.
+
+Cleaning up images
+You have stopped the container, but maybe you want to remove the image as well. This can be good for troubleshooting or for reclaiming space.
+
+Grab the image id
+
+docker images
+Remove it
+
+docker image rm <image-id>
+Note: If you are having issues removing the image, likely the issue is a container is still referencing that image. All containers referencing the image must be stopped AND removed
+
+End of Lab!
